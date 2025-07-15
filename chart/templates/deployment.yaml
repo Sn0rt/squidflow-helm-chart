@@ -65,6 +65,8 @@ spec:
             - name: ssh-known-hosts
               mountPath: /app/config/ssh
               readOnly: true
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
         {{- end }}
       containers:
         - name: ssh-agent
@@ -86,6 +88,8 @@ spec:
               mountPath: /tmp/.ssh
             - name: ssh-agent-socket
               mountPath: /ssh-agent
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
         - name: {{ include "squidflow.fullname" . }}-backend
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
@@ -104,6 +108,8 @@ spec:
             - name: http
               containerPort: 38080
               protocol: TCP
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
           volumeMounts:
             - name: config-volume
               mountPath: /etc/service
