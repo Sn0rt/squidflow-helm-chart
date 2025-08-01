@@ -117,3 +117,22 @@ git:
     - name: "source-secret-rw-ssh"
       keyField: "id_rsa"
       mountPath: "id_rsa"
+
+externalSecret:
+  enabled: true
+  secretStore:
+    name: "vault-secret-store"
+    kind: "SecretStore"
+  remoteRefs:
+    SQ_GITOPS_ACCESS_TOKEN:
+      key: "squidflow/gitops"
+      property: "access_token"
+    SQ_GITOPS_DRONEV3_PASSWORD:
+      key: "squidflow/gitops"
+      property: "dronev3_password"
+    SQ_GITOPS_DRONEV3_TOKEN:
+      key: "squidflow/gitops"
+      property: "dronev3_token"
+    SQ_AUTH_SALT:
+      key: "squidflow/auth"
+      property: "salt"
