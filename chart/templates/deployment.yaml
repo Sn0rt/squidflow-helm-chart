@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ include "squidflow.fullname" . }}
       # Add init container for ssh-agent setup
       initContainers:
-        {{- if .Values.git.secrets }}
+        {{- if .Values.config.git.secrets }}
         - name: init-ssh
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
           command:
@@ -33,7 +33,7 @@ spec:
               chmod 700 /tmp/.ssh
 
               # Copy SSH keys with strict permissions
-              {{- range .Values.git.secrets }}
+              {{- range .Values.config.git.secrets }}
               cp /ssh-keys/{{ .mountPath }} /tmp/.ssh/
               chmod 600 /tmp/.ssh/{{ .mountPath }}
               {{- end }}
@@ -66,7 +66,12 @@ spec:
               mountPath: /app/config/ssh
               readOnly: true
           resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
         {{- end }}
       containers:
         - name: ssh-agent
@@ -76,7 +81,7 @@ spec:
             - -c
             - |
               eval $(ssh-agent -a $SSH_AUTH_SOCK)
-              {{- range .Values.git.secrets }}
+              {{- range .Values.config.git.secrets }}
               ssh-add /tmp/.ssh/{{ .mountPath }}
               {{- end }}
               sleep infinity
@@ -89,7 +94,12 @@ spec:
             - name: ssh-agent-socket
               mountPath: /ssh-agent
           resources:
-            {{- toYaml .Values.backend.resources | nindent 12 }}
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
         - name: {{ include "squidflow.fullname" . }}-backend
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
@@ -101,9 +111,9 @@ spec:
             - name: SSH_KNOWN_HOSTS
               value: /tmp/.ssh/known_hosts
             - name: GIT_USER
-              value: {{ .Values.git.name }}
+              value: {{ .Values.config.git.name }}
             - name: GIT_EMAIL
-              value: {{ .Values.git.email }}
+              value: {{ .Values.config.git.email }}
           ports:
             - name: http
               containerPort: 38080
@@ -113,7 +123,7 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /etc/service
-            {{- if .Values.git.secrets }}
+            {{- if .Values.config.git.secrets }}
             - name: shared-ssh
               mountPath: /tmp/.ssh
             - name: ssh-agent-socket
@@ -134,15 +144,15 @@ spec:
             name: argocd-ssh-known-hosts-cm # copy from argocd-ssh-known-hosts-cm
           name: ssh-known-hosts
         - name: config-volume
-          configMap:
-            name: {{ include "squidflow.fullname" . }}-config
-        {{- if .Values.git.secrets }}
+          secret:
+            secretName: {{ include "squidflow.fullname" . }}-config
+        {{- if .Values.config.git.secrets }}
         - name: shared-ssh
           emptyDir: {}
         - name: ssh-keys
           projected:
             sources:
-            {{- range .Values.git.secrets }}
+            {{- range .Values.config.git.secrets }}
             - secret:
                 name: {{ .name }}
                 items:

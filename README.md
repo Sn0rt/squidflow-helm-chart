@@ -3,6 +3,7 @@
 This Helm Chart is designed to deploy Squidflow Service with both frontend and backend components.
 
 ## Table of Contents
+
 - [Prerequisites](#prerequisites)
 - [Features](#features)
 - [Quick Start](#quick-start)
@@ -105,6 +106,7 @@ helm template chart --set argocd.password=eYysu0BNxzDcxlSK
 | `ingress.annotations` | Ingress annotations | `{}` | No |
 
 The ingress is configured with two paths by default:
+
 - `/api/*` - Routes to backend service (backend:38080)
 - `/*` - Routes to frontend service (frontend:80)
 
@@ -198,7 +200,6 @@ helm install squidflow chart \
 | `gitops.mode` | GitOps operation mode | `"pull_request"` | No |
 | `gitops.branchPrefix` | Prefix for created branches | `"squidflow-change"` | No |
 | `gitops.kubeconformCrdsPath` | Path template for kubeconform CRDs | `"file:///app/crds/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json"` | No |
-
 
 ## example with minikube (dev)
 

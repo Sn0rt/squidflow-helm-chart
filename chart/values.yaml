@@ -18,8 +18,8 @@ backend:
       cpu: 100m
       memory: 128Mi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 1000m
+      memory: 2048Mi
   ca:
     enabled: false
     certificates:
@@ -42,8 +42,8 @@ frontend:
       cpu: 100m
       memory: 128Mi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 1000m
+      memory: 1024Mi
 
 ingress:
   enabled: false
@@ -61,41 +61,37 @@ config:
     branch_prefix: "SQ-change"
     kubeconform_crds_path_prefix: "../submodules/"
 
-    native:
-      enabled: false
-      remote_url: "https://github.com/squidflow/gitops.git"
-      access_token: ""
-      username: ""
-      password: ""
-
     vendor1:
       enabled: true
-      env: "sit"
+      available_envs: ["sit", "uat"]
+      git_provider_base_url: "https://bitbucket.example.com:8443/abcigit"
 
       sit:
-        name: "sit"
+        enabled: true
         platform_url: "ssh://git@localhost:7999/ad/platform.git?ref=sit"
-        git_provider_base_url: ""
+        release_url: "ssh://git@localhost:7999/ad/release-uat.git?ref=master"
         access_token: ""
         registry_prefix: "jforgimg.china.example.com:5000/adak8s"
+        dronev3_username: "adak8s"
+        dronev3_base_url: "https://localhost:8080"
 
-      user:
-        name: "user"
+      uat:
+        enabled: true
+        platform_url: "ssh://git@localhost:7999/ad/platform.git?ref=uat"
+        release_url: "ssh://git@localhost:7999/ad/release-uat.git?ref=master"
+        access_token: ""
+        registry_prefix: "jforgimg.china.example.com:5000/adak8s"
+        dronev3_username: "adak8s"
+        dronev3_base_url: "https://localhost:8080"
 
-  argocd:
-    server_address: "argocd-server.argocd.svc.cluster.local:80"
-    username: ""
-    password: ""
-    plaintext: false
-    insecure: true
-    grpcweb: true
+      prd:
+        enabled: false
 
   auth:
-    salt: "secure-salt-value-123"
     users:
       - username: "admin"
         password_hash: "I8oGKlFTlxB3bRPQxMNYohbKvU7dHklYEMhzfKUnX1U="
-        tenants: ["*"]
+        tenants: ["adak8s", "squidflow"]
         roles: ["admin"]
       - username: "adak8s"
         password_hash: "MyY76pVvaZ5RHgaMqSdvbk6Q8mMDED9jLzU3CjFZeyg="
@@ -106,33 +102,32 @@ config:
         tenants: ["ada"]
         roles: ["user"]
 
-ssh_known_hosts:
-  - "[bitbucket.com]:7999 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H"
-  - "[172.16.24.127]:7999 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCOop2P6qG77S7D1C1ptLHrInTJQhAh6cyedrLtCA/EFm9urpb65hGX8Nh+pAmMjNHjXypfVHZeKtJ2CobfKBsYL/V/fJN3LQW2VedC9uuU4OnEbAXy0YdYstvYNX125OStaZtxXs4FccsNCJz/jl0NfkEV9XhGKHQj9S5e1Z7LtTg6YyqyEH3ERQRqi6jWf2F+rhJM8xWtKLzqDbiCBFFKhaYD7jADFLkpeGLWJ7wcv5nBp0MlDcRBohK91h4CvHf8qpFtWPwywHSQfKj5naHfkk/+UwCK67Hb69ZXz5awwPN+Sys6IHbioPFd0GkyFaP3OfQ8pRLjBnUTKyX9yFeL"
+  ssh_known_hosts:
+    - "[bitbucket.com]:7999 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H"
+    - "[172.16.24.127]:7999 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCOop2P6qG77S7D1C1ptLHrInTJQhAh6cyedrLtCA/EFm9urpb65hGX8Nh+pAmMjNHjXypfVHZeKtJ2CobfKBsYL/V/fJN3LQW2VedC9uuU4OnEbAXy0YdYstvYNX125OStaZtxXs4FccsNCJz/jl0NfkEV9XhGKHQj9S5e1Z7LtTg6YyqyEH3ERQRqi6jWf2F+rhJM8xWtKLzqDbiCBFFKhaYD7jADFLkpeGLWJ7wcv5nBp0MlDcRBohK91h4CvHf8qpFtWPwywHSQfKj5naHfkk/+UwCK67Hb69ZXz5awwPN+Sys6IHbioPFd0GkyFaP3OfQ8pRLjBnUTKyX9yFeL"
 
-git:
-  name: git
-  email: git@example.com
-  secrets:
-    - name: "source-secret-rw-ssh"
-      keyField: "id_rsa"
-      mountPath: "id_rsa"
+  git:
+    name: git
+    email: git@example.com
+    secrets:
+      - name: "source-secret-rw-ssh"
+        keyField: "id_rsa"
+        mountPath: "id_rsa"
 
 externalSecret:
-  enabled: true
   secretStore:
-    name: "vault-secret-store"
-    kind: "SecretStore"
+    name: "default-secret-store"
+    kind: "ClusterSecretStore"
   remoteRefs:
     SQ_GITOPS_ACCESS_TOKEN:
-      key: "squidflow/gitops"
-      property: "access_token"
-    SQ_GITOPS_DRONEV3_PASSWORD:
-      key: "squidflow/gitops"
-      property: "dronev3_password"
-    SQ_GITOPS_DRONEV3_TOKEN:
-      key: "squidflow/gitops"
-      property: "dronev3_token"
+      key: "squidflow"
+      property: "SQ_GITOPS_ACCESS_TOKEN"
     SQ_AUTH_SALT:
-      key: "squidflow/auth"
-      property: "salt"
+      key: "squidflow"
+      property: "SQ_AUTH_SALT"
+    SQ_GITOPS_DRONEV3_TOKEN:
+      key: "squidflow"
+      property: "SQ_GITOPS_DRONEV3_TOKEN"
+    SQ_GITOPS_DRONEV3_PASSWORD:
+      key: "squidflow"
+      property: "SQ_GITOPS_DRONEV3_PASSWORD"
